@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>مكتبة هندسة دمنهور</title>
+<meta name="theme-color" content="#4f46e5">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="مواد الهندسة">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="logo-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script>try{var d=localStorage.getItem('em_dark');if(d==='1'||(d===null&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}</script>
+<style>
+:root{--bg:#f4f5fb;--card:#fff;--text:#1e1b4b;--muted:#6b7280;--line:#e5e7eb;--soft:#eef2ff;--brand:#4f46e5;--brand2:#9333ea;--ok:#16a34a;--dot:#d9dcf0}
+.dark{--bg:#0a0c14;--card:#141826;--text:#eceefd;--muted:#98a0c4;--line:#252b44;--soft:#1d2240;--dot:#1a1f33}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Cairo,system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;
+  background-image:radial-gradient(var(--dot) 1px,transparent 1px);background-size:22px 22px;padding-bottom:env(safe-area-inset-bottom,0px)}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+input,select,textarea{font:inherit;color:var(--text)}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+header{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--card) 82%,transparent);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.bar{max-width:1000px;margin:auto;padding:10px 14px;display:flex;align-items:center;gap:10px}
+.logo{width:44px;height:44px;border-radius:50%;flex:none;display:block;object-fit:cover}
+.ttl{flex:1;min-width:0}
+.ttl b{display:block;font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ttl small{color:var(--muted);font-size:.74rem}
+.ib{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--soft);flex:none}
+nav.tabs{max-width:1000px;margin:auto;display:flex;gap:6px;padding:0 14px 10px;overflow-x:auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs a{flex:none;padding:7px 14px;border-radius:999px;font-size:.85rem;font-weight:600;background:var(--soft);color:var(--muted)}
+nav.tabs a.on{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff}
+main{max-width:1000px;margin:auto;padding:16px 14px 50px}
+.search{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px;margin-bottom:16px}
+.search .r{display:flex;gap:8px}
+.search input[type=search]{flex:1;min-width:0;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
+.btn{padding:9px 14px;border-radius:12px;background:var(--soft);font-weight:600;font-size:.88rem}
+.btn.pri{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff}
+.btn.del{color:#e11d48}
+.filters{display:none;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:8px}
+.filters.open{display:grid}
+select,.inp{padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);width:100%}
+.hint{color:var(--muted);font-size:.8rem;margin-top:8px}
+.res{margin-top:8px;display:grid;gap:6px}
+h2.sec{font-size:1.05rem;margin:22px 2px 10px;font-weight:800}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;display:block;transition:transform .15s,border-color .15s}
+.card:hover{transform:translateY(-2px);border-color:var(--brand)}
+.card .em{font-size:1.7rem}
+.card b{display:block;margin-top:8px;font-size:.98rem}
+.card small{color:var(--muted);font-size:.78rem}
+.hero{border-radius:24px;padding:22px;color:#fff;background:linear-gradient(135deg,#6366f1,#9333ea);margin-bottom:16px}
+.hero h1{font-size:1.4rem;font-weight:800}
+.hero p{opacity:.85;font-size:.9rem;margin-top:4px}
+.stats{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:.85rem;opacity:.9;align-items:center}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.pill{padding:8px 15px;border-radius:12px;font-weight:600;font-size:.88rem;background:var(--card);border:1px solid var(--line)}
+.pill.on{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border-color:transparent}
+.bar-p{height:6px;border-radius:9px;background:var(--soft);margin-top:10px;overflow:hidden}
+.bar-p i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),var(--brand2))}
+details.s{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:12px;overflow:hidden}
+details.s>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;font-weight:700}
+details.s>summary::-webkit-details-marker{display:none}
+details.s>summary::before{content:"▾";color:var(--muted);transition:transform .2s}
+details.s:not([open])>summary::before{transform:rotate(90deg)}
+details.s>summary span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+details.s>summary em{font-style:normal;font-weight:400;font-size:.78rem;color:var(--muted)}
+.lk{display:flex;align-items:center;gap:8px;padding:8px 12px;margin:0 6px 4px;border-radius:12px}
+.lk:hover{background:var(--soft)}
+.lk>a{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.92rem}
+.lk>a:hover{color:var(--brand)}
+.lk .m{font-size:.72rem;color:var(--muted);display:block}
+.ck{width:22px;height:22px;border-radius:7px;border:2px solid var(--line);flex:none;display:grid;place-items:center;color:#fff;font-size:.75rem}
+.ck.on{background:var(--ok);border-color:var(--ok)}
+.lk.done>a{color:var(--muted);text-decoration:line-through}
+.sm{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none;color:var(--muted);font-size:.9rem}
+.sm:hover{background:var(--soft);color:var(--brand)}
+.sm.fav{color:#f43f5e}
+.empty{text-align:center;color:var(--muted);padding:40px 10px}
+.ring{width:52px;height:52px;position:relative;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring span{position:absolute;inset:0;display:grid;place-items:center;font-size:.72rem;font-weight:700}
+.toast{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;padding:10px 18px;border-radius:12px;font-size:.88rem;z-index:99}
+footer{text-align:center;color:var(--muted);font-size:.78rem;padding:10px 0 30px}
+.adm{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:14px}
+.adm h3{font-size:.98rem;margin-bottom:10px}
+.fr{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:8px}
+textarea.inp{min-height:90px;resize:vertical}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row>.grow{flex:1}
+.sub{border-top:1px dashed var(--line);margin-top:10px;padding-top:10px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <button class="ib" id="back" title="رجوع" aria-label="رجوع">➜</button>
+    <img class="logo" src="logo-192.png" alt="شعار كلية الهندسة جامعة دمنهور" width="44" height="44">
+    <div class="ttl"><b id="ttl">مكتبة هندسة دمنهور</b><small>كل الأقسام والفرق</small></div>
+    <button class="ib" id="dark" title="الوضع الليلي" aria-label="الوضع الليلي">🌓</button>
+  </div>
+  <nav class="tabs" id="tabs"></nav>
+</header>
+<main>
+  <section class="search" aria-label="بحث المحتوى">
+    <div class="row">
+      <input type="search" id="q" placeholder="ابحث في المواد والروابط..." autocomplete="off">
+      <button class="btn" id="ftog" aria-expanded="false">فلاتر</button>
+    </div>
+    <div class="filters" id="filters">
+      <select id="f-dept"></select>
+      <select id="f-year"></select>
+      <select id="f-term"></select>
+    </div>
+    <div class="hint" id="hint" hidden>اكتب حرفين على الأقل.</div>
+    <div class="res" id="res"></div>
+  </section>
+  <div id="app"></div>
+</main>
+<footer>بيتحدّث أول بأول · <a href="#/admin" style="text-decoration:underline">إدارة</a></footer>
+
+<script type="module">
+import {firebaseConfig,SITE_NAME,DEPTS,YEARS,TERMS,DEFAULT_SECTIONS} from "./config.js";
+
+/* ============ بيانات ============ */
+const LIVE = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("PASTE");
+let courses = [], fb = null, user = null;
+
+const uid = () => Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4);
+const DEMO = [
+  {id:"demo1",dept:"comm",year:"1",term:"1",name:"Math 3",sections:[
+    {id:"a",title:"محاضرات",links:[{id:"l1",title:"محاضرة 1",url:"https://youtu.be/",addedAt:Date.now()-1e8},{id:"l2",title:"محاضرة 2",url:"https://drive.google.com/",addedAt:Date.now()-5e7}]},
+    {id:"b",title:"شيتات",links:[{id:"l3",title:"شيت 1",url:"https://example.com/sheet.pdf",addedAt:Date.now()}]}]},
+  {id:"demo2",dept:"prep",year:"1",term:"1",name:"فيزياء 1",sections:[{id:"c",title:"محاضرات",links:[{id:"l4",title:"المحاضرة الأولى",url:"https://drive.google.com/",addedAt:Date.now()-2e8}]}]}
+];
+
+function ls(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}}
+function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+const S = {done:ls("em_done",{}), fav:ls("em_fav",{})};
+
+async function boot(){
+  if(!LIVE){ courses = DEMO; route(); return; }
+  courses = ls("em_cache",[]); route();
+  const [{initializeApp},{getFirestore,collection,onSnapshot,addDoc,updateDoc,deleteDoc,doc},{getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged}] = await Promise.all([
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js")]);
+  const app = initializeApp(firebaseConfig), db = getFirestore(app), auth = getAuth(app);
+  fb = {db,auth,addDoc,updateDoc,deleteDoc,doc,collection,signInWithEmailAndPassword,signOut};
+  onAuthStateChanged(auth,u=>{user=u;if(isAdminRoute())route()});
+  onSnapshot(collection(db,"courses"),snap=>{
+    courses = snap.docs.map(d=>({id:d.id,...d.data()}));
+    sv("em_cache",courses); route();
+  },err=>{console.error(err);toast("مش قادر أحمّل المواد دلوقتي")});
+}
+
+/* ============ أدوات ============ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const safeUrl = u => /^https?:\/\//i.test(u) ? u : "#";
+const dept = id => DEPTS.find(d=>d.id===id);
+const linksOf = c => (c.sections||[]).flatMap(s=>(s.links||[]).map(l=>({...l,section:s.title,course:c})));
+const nLinks = c => linksOf(c).length;
+const prog = c => {const a=linksOf(c);return {done:a.filter(l=>S.done[l.id]).length,total:a.length}};
+function icon(u){u=u.toLowerCase();return /youtu/.test(u)?"▶️":/drive\.google|docs\.google/.test(u)?"📁":/\.pdf(\?|$)/.test(u)?"📄":"🔗"}
+function toast(t){const e=document.createElement("div");e.className="toast";e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),1800)}
+const isAdminRoute = () => location.hash.startsWith("#/admin");
+const ring = (d,t) => {const p=t?d/t:0;return `<div class="ring"><svg width="52" height="52" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="3.5"/><circle cx="18" cy="18" r="15.9" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="${(p*100).toFixed(1)} 100"/></svg><span>${d}/${t}</span></div>`};
+
+/* ============ العرض ============ */
+function setTabs(active){
+  const t=[["#/","الرئيسية"],["#/latest","آخر الإضافات"],["#/fav","المفضلة"]];
+  $("#tabs").innerHTML=t.map(([h,n])=>`<a href="${h}" class="${active===h?"on":""}">${n}</a>`).join("");
+}
+function linkRow(l,showCourse){
+  const on=S.done[l.id], f=S.fav[l.id];
+  return `<div class="lk ${on?"done":""}">
+    <button class="ck ${on?"on":""}" data-act="done" data-id="${esc(l.id)}" aria-label="علّم إنك خلصته">${on?"✓":""}</button>
+    <span>${icon(l.url)}</span>
+    <a href="${esc(safeUrl(l.url))}" target="_blank" rel="noopener noreferrer">${esc(l.title)}${showCourse?`<span class="m">${esc(l.course.name)} · ${esc(l.section)}</span>`:""}</a>
+    <button class="sm" data-act="copy" data-url="${esc(l.url)}" title="نسخ اللينك" aria-label="نسخ اللينك">⧉</button>
+    <button class="sm ${f?"fav":""}" data-act="fav" data-id="${esc(l.id)}" title="المفضلة" aria-label="المفضلة">${f?"♥":"♡"}</button>
+  </div>`;
+}
+
+function home(){
+  setTabs("#/");$("#ttl").textContent=SITE_NAME;
+  $("#app").innerHTML=`<div class="hero"><h1>مواد كلية الهندسة — جامعة دمنهور</h1><p>اختار قسمك وفرقتك وابدأ المذاكرة.</p></div>
+  <h2 class="sec">الأقسام</h2><div class="grid">${DEPTS.map(d=>{
+    const cs=courses.filter(c=>c.dept===d.id);
+    return `<a class="card" href="#/d/${d.id}"><div class="em">${d.icon}</div><b>${esc(d.name)}</b><small>${cs.length} مادة · ${cs.reduce((a,c)=>a+nLinks(c),0)} رابط</small></a>`}).join("")}</div>`;
+}
+
+function deptView(id,y,t){
+  const d=dept(id); if(!d) return home();
+  const yrs=YEARS.filter(a=>!d.years||d.years.includes(a.id));
+  if(!yrs.some(a=>a.id===y)) y=yrs[0].id;
+  t=t||"1"; setTabs("");$("#ttl").textContent=d.name;
+  const cs=courses.filter(c=>c.dept===id&&c.year===y&&c.term===t);
+  $("#app").innerHTML=`<div class="hero"><h1>${d.icon} ${esc(d.name)}</h1><p>${courses.filter(c=>c.dept===id).length} مادة في القسم</p></div>
+  ${yrs.length>1?`<div class="pills">${yrs.map(a=>`<a class="pill ${a.id===y?"on":""}" href="#/d/${id}/${a.id}/${t}">${a.name}</a>`).join("")}</div>`:""}
+  <div class="pills">${TERMS.map(a=>`<a class="pill ${a.id===t?"on":""}" href="#/d/${id}/${y}/${a.id}">${a.name}</a>`).join("")}</div>
+  ${cs.length?`<div class="grid">${cs.map(c=>{const p=prog(c);return `<a class="card" href="#/c/${encodeURIComponent(c.id)}"><div class="em">📘</div><b>${esc(c.name)}</b><small>${(c.sections||[]).filter(s=>(s.links||[]).length).length} قسم · ${p.total} رابط</small><div class="bar-p"><i style="width:${p.total?p.done/p.total*100:0}%"></i></div></a>`}).join("")}</div>`:`<div class="empty">مفيش مواد هنا لسه 📭</div>`}`;
+}
+
+function courseView(id){
+  const c=courses.find(x=>x.id===id);
+  if(!c){$("#app").innerHTML=`<div class="empty">المادة مش موجودة.</div>`;return}
+  setTabs("");$("#ttl").textContent=c.name;
+  const d=dept(c.dept), p=prog(c), secs=(c.sections||[]).filter(s=>(s.links||[]).length);
+  $("#app").innerHTML=`<div class="hero"><h1>${esc(c.name)}</h1><p>${esc(d?d.name:"")} · ${esc((YEARS.find(y=>y.id===c.year)||{}).name||"")} · ${esc((TERMS.find(t=>t.id===c.term)||{}).name||"")}</p>
+    <div class="stats"><span>${secs.length} قسم</span><span>${p.total} رابط</span>${ring(p.done,p.total)}<button class="btn" data-act="reset" data-id="${esc(c.id)}" style="background:rgba(255,255,255,.18);color:#fff">مسح التقدم</button></div></div>
+    ${secs.length?secs.map((s,i)=>`<details class="s" open><summary><span>${esc(s.title)}</span><em>${s.links.length} رابط</em></summary>${s.links.map(l=>linkRow({...l,section:s.title,course:c})).join("")}<div style="height:6px"></div></details>`).join(""):`<div class="empty">لسه مفيش روابط في المادة دي.</div>`}`;
+}
+
+function favView(){
+  setTabs("#/fav");$("#ttl").textContent="المفضلة";
+  const a=courses.flatMap(linksOf).filter(l=>S.fav[l.id]);
+  $("#app").innerHTML=a.length?`<h2 class="sec">المفضلة (${a.length})</h2><div class="adm" style="padding:6px">${a.map(l=>linkRow(l,true)).join("")}</div>`:`<div class="empty">اضغطي ♡ جنب أي لينك عشان يتحفظ هنا.</div>`;
+}
+function latestView(){
+  setTabs("#/latest");$("#ttl").textContent="آخر الإضافات";
+  const a=courses.flatMap(linksOf).sort((x,y)=>(y.addedAt||0)-(x.addedAt||0)).slice(0,30);
+  $("#app").innerHTML=a.length?`<h2 class="sec">آخر ${a.length} إضافة</h2><div class="adm" style="padding:6px">${a.map(l=>linkRow(l,true)).join("")}</div>`:`<div class="empty">مفيش إضافات لسه.</div>`;
+}
+
+/* ============ لوحة الإدارة ============ */
+const opts = (arr,sel) => arr.map(a=>`<option value="${a.id}" ${a.id===sel?"selected":""}>${esc(a.name)}</option>`).join("");
+async function save(c){ await fb.updateDoc(fb.doc(fb.db,"courses",c.id),{sections:c.sections}); }
+
+function adminView(){
+  setTabs("");$("#ttl").textContent="لوحة الإدارة";
+  if(!LIVE){$("#app").innerHTML=`<div class="adm"><h3>الإدارة مش شغالة</h3><p class="hint">املي بيانات Firebase في ملف config.js الأول (الخطوات في أول الملف).</p></div>`;return}
+  if(!user){
+    $("#app").innerHTML=`<form class="adm" data-form="login"><h3>تسجيل دخول الإدارة</h3>
+      <div class="fr"><input class="inp" name="email" type="email" placeholder="الإيميل" required autocomplete="username"><input class="inp" name="pass" type="password" placeholder="الباسورد" required autocomplete="current-password"></div>
+      <button class="btn pri">دخول</button></form>`;return}
+  const open=new Set([...document.querySelectorAll("details[data-cid][open]")].map(e=>e.dataset.cid));
+  $("#app").innerHTML=`<div class="row" style="margin-bottom:12px"><b class="grow">أهلاً ${esc(user.email)}</b><button class="btn" data-act="logout">خروج</button></div>
+  <form class="adm" data-form="newcourse"><h3>مادة جديدة</h3>
+    <div class="fr"><select name="dept">${opts(DEPTS)}</select><select name="year">${opts(YEARS)}</select><select name="term">${opts(TERMS)}</select></div>
+    <div class="row"><input class="inp grow" name="name" placeholder="اسم المادة" required><button class="btn pri">إضافة المادة</button></div>
+    <p class="hint">بتتعمل مع السكاشن الجاهزة (${DEFAULT_SECTIONS.join("، ")}) وتقدري تغيريها بعد كده. الاعدادي بيظهر فيه الفرقة الأولى بس.</p></form>
+  <h2 class="sec">المواد (${courses.length})</h2>
+  ${courses.slice().sort((a,b)=>(a.dept+a.year+a.term+a.name).localeCompare(b.dept+b.year+b.term+b.name)).map(c=>`
+   <details class="s" data-cid="${esc(c.id)}" ${open.has(c.id)?"open":""}><summary><span>${esc(c.name)}</span><em>${esc((dept(c.dept)||{}).name||"")} · ف${esc(c.year)} ت${esc(c.term)}</em></summary>
+    <div style="padding:0 14px 14px">
+     ${(c.sections||[]).map((s,i)=>`<div class="sub"><div class="row"><b class="grow">${esc(s.title)} (${(s.links||[]).length})</b><button class="btn del" data-act="delsec" data-id="${esc(c.id)}" data-i="${i}">حذف القسم</button></div>
+       ${(s.links||[]).map(l=>`<div class="lk"><a href="${esc(safeUrl(l.url))}" target="_blank" rel="noopener">${esc(l.title)}</a><button class="sm" data-act="dellink" data-id="${esc(c.id)}" data-i="${i}" data-l="${esc(l.id)}" aria-label="حذف">✕</button></div>`).join("")}
+       <form data-form="addlinks" data-id="${esc(c.id)}" data-i="${i}"><textarea class="inp" name="t" placeholder="كل سطر: العنوان | اللينك&#10;محاضرة 1 | https://..." required></textarea><button class="btn pri" style="margin-top:6px">إضافة الروابط</button></form></div>`).join("")}
+     <form class="sub row" data-form="addsec" data-id="${esc(c.id)}"><input class="inp grow" name="t" placeholder="قسم جديد (مثلاً: مراجعة نهائية)" required><button class="btn">إضافة قسم</button></form>
+     <div class="sub"><button class="btn del" data-act="delcourse" data-id="${esc(c.id)}">حذف المادة كلها</button></div>
+    </div></details>`).join("")}`;
+}
+
+/* ============ البحث ============ */
+function fillFilters(){
+  $("#f-dept").innerHTML=`<option value="">كل الأقسام</option>`+opts(DEPTS);
+  $("#f-year").innerHTML=`<option value="">كل الفرق</option>`+opts(YEARS);
+  $("#f-term").innerHTML=`<option value="">الترمان</option>`+opts(TERMS);
+}
+function search(){
+  const q=$("#q").value.trim().toLowerCase(), fd=$("#f-dept").value, fy=$("#f-year").value, ft=$("#f-term").value;
+  $("#hint").hidden = !(q.length===1);
+  const box=$("#res");
+  if(q.length<2){box.innerHTML="";return}
+  const cs=courses.filter(c=>(!fd||c.dept===fd)&&(!fy||c.year===fy)&&(!ft||c.term===ft));
+  const out=[];
+  cs.forEach(c=>{
+    if(c.name.toLowerCase().includes(q)) out.push(`<a class="card" href="#/c/${encodeURIComponent(c.id)}">📘 <b style="display:inline">${esc(c.name)}</b> <small>${esc((dept(c.dept)||{}).name||"")}</small></a>`);
+    linksOf(c).forEach(l=>{ if((l.title+" "+l.section).toLowerCase().includes(q)) out.push(linkRow(l,true)) });
+  });
+  box.innerHTML=out.length?out.slice(0,40).join(""):`<div class="empty">مفيش نتايج.</div>`;
+}
+
+/* ============ الراوتر ============ */
+function route(){
+  const p=location.hash.replace(/^#\/?/,"").split("/").map(decodeURIComponent);
+  const [v,a,b,c]=p;
+  if(v==="d") deptView(a,b,c);
+  else if(v==="c") courseView(a);
+  else if(v==="fav") favView();
+  else if(v==="latest") latestView();
+  else if(v==="admin") adminView();
+  else home();
+  search();
+}
+addEventListener("hashchange",()=>{route();scrollTo(0,0)});
+
+/* ============ أحداث ============ */
+document.addEventListener("click",async e=>{
+  const t=e.target.closest("[data-act]"); if(!t) return;
+  const act=t.dataset.act, id=t.dataset.id;
+  if(act==="done"){S.done[id]?delete S.done[id]:S.done[id]=1;sv("em_done",S.done);route()}
+  else if(act==="fav"){S.fav[id]?delete S.fav[id]:S.fav[id]=1;sv("em_fav",S.fav);route()}
+  else if(act==="copy"){try{await navigator.clipboard.writeText(t.dataset.url);toast("اتنسخ ✓")}catch(_){toast("مقدرتش أنسخ")}}
+  else if(act==="reset"){const c=courses.find(x=>x.id===id);if(c&&confirm("تمسحي تقدمك في المادة دي؟")){linksOf(c).forEach(l=>delete S.done[l.id]);sv("em_done",S.done);route()}}
+  else if(act==="logout"){await fb.signOut(fb.auth)}
+  else if(act==="delcourse"){if(confirm("حذف المادة وكل روابطها؟")){await fb.deleteDoc(fb.doc(fb.db,"courses",id))}}
+  else if(act==="delsec"){const c=courses.find(x=>x.id===id);if(c&&confirm("حذف القسم؟")){c.sections.splice(+t.dataset.i,1);await save(c)}}
+  else if(act==="dellink"){const c=courses.find(x=>x.id===id),s=c.sections[+t.dataset.i];s.links=s.links.filter(l=>l.id!==t.dataset.l);await save(c)}
+});
+
+document.addEventListener("submit",async e=>{
+  const f=e.target.closest("[data-form]"); if(!f) return; e.preventDefault();
+  const k=f.dataset.form, fd=new FormData(f), id=f.dataset.id;
+  try{
+    if(k==="login"){await fb.signInWithEmailAndPassword(fb.auth,fd.get("email"),fd.get("pass"))}
+    else if(k==="newcourse"){
+      await fb.addDoc(fb.collection(fb.db,"courses"),{dept:fd.get("dept"),year:fd.get("year"),term:fd.get("term"),name:fd.get("name").trim(),
+        sections:DEFAULT_SECTIONS.map(t=>({id:uid(),title:t,links:[]})),createdAt:Date.now()});
+      toast("اتضافت المادة ✓");
+    }
+    else if(k==="addsec"){const c=courses.find(x=>x.id===id);c.sections=[...(c.sections||[]),{id:uid(),title:fd.get("t").trim(),links:[]}];await save(c);toast("اتضاف القسم ✓")}
+    else if(k==="addlinks"){
+      const c=courses.find(x=>x.id===id), s=c.sections[+f.dataset.i];
+      const add=fd.get("t").split("\n").map(r=>r.trim()).filter(Boolean).map(r=>{
+        const i=r.lastIndexOf("|"); const title=i>-1?r.slice(0,i).trim():r, url=(i>-1?r.slice(i+1):r).trim();
+        return /^https?:\/\//i.test(url)?{id:uid(),title:i>-1?title:url,url,addedAt:Date.now()}:null}).filter(Boolean);
+      if(!add.length){toast("الصيغة: العنوان | اللينك");return}
+      s.links=[...(s.links||[]),...add]; await save(c); toast(`اتضاف ${add.length} رابط ✓`);
+    }
+  }catch(err){console.error(err);toast(err.code==="permission-denied"?"الإيميل ده مش مسموح له يكتب":"حصلت مشكلة: "+(err.code||err.message))}
+});
+
+$("#q").addEventListener("input",search);
+for(const s of ["#f-dept","#f-year","#f-term"]) $(s).addEventListener("change",search);
+$("#ftog").addEventListener("click",e=>{const o=$("#filters").classList.toggle("open");e.currentTarget.setAttribute("aria-expanded",o)});
+$("#dark").addEventListener("click",()=>{const d=document.documentElement.classList.toggle("dark");try{localStorage.setItem("em_dark",d?"1":"0")}catch(e){}});
+$("#back").addEventListener("click",()=>{ if(location.hash&&location.hash!=="#/") history.back(); else location.hash="#/" });
+
+fillFilters();
+boot();
+</script>
+</body>
+</html>
