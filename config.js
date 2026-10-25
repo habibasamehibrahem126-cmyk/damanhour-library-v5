@@ -40,3 +40,10 @@ export const TERMS = [
 
 // السكاشن اللي بتتعمل أوتوماتيك مع كل مادة جديدة
 export const DEFAULT_SECTIONS = ["محاضرات", "سكاشن", "شيتات", "حلول الشيتات", "ملخصات", "امتحانات سابقة", "عملي"];
+
+
+// ============ تخزين ملفات المكتبة (Supabase Storage) ============
+// ضعي رابط مشروع Supabase ومفتاحه العام (Publishable/anon) فقط هنا.
+// لا تضعي أبدًا service_role أو Secret key داخل هذا الملف.
+export const SUPABASE_URL = "https://vtxblazwbaynkaqxqwxj.supabase.co";
+export const SUPABASE_ANON_KEY = "sb_publishable_DhUDZ1wS9keEGxGQwTr2cw_pfustuxy";
