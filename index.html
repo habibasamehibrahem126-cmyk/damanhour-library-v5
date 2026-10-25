@@ -44,6 +44,7 @@ main{max-width:1000px;margin:auto;padding:16px 14px 50px}
 .btn{padding:9px 14px;border-radius:12px;background:var(--soft);font-weight:600;font-size:.88rem}
 .btn.pri{background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff}
 .btn.del{color:#e11d48}
+.btn:disabled{opacity:.65;cursor:wait}
 .filters{display:none;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:8px}
 .filters.open{display:grid}
 select,.inp{padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);width:100%}
@@ -128,10 +129,15 @@ textarea.inp{min-height:90px;resize:vertical}
 <footer>بيتحدّث أول بأول · <a href="#/admin" style="text-decoration:underline">إدارة</a></footer>
 
 <script type="module">
-import {firebaseConfig,SITE_NAME,DEPTS,YEARS,TERMS,DEFAULT_SECTIONS} from "./config.js";
+import {firebaseConfig,SITE_NAME,DEPTS,YEARS,TERMS,DEFAULT_SECTIONS,SUPABASE_URL,SUPABASE_ANON_KEY} from "./config.js";
 
 /* ============ بيانات ============ */
 const LIVE = firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("PASTE");
+const STORAGE_READY = /^https:\/\//i.test(SUPABASE_URL||"") &&
+  !/YOUR_PROJECT_REF|PASTE_HERE/i.test(SUPABASE_URL||"") &&
+  !!SUPABASE_ANON_KEY && !/YOUR_SUPABASE|PASTE_HERE/i.test(SUPABASE_ANON_KEY||"");
+const STORAGE_FUNCTION = STORAGE_READY ? `${SUPABASE_URL.replace(/\/$/,"")}/functions/v1/library-files` : "";
+const MAX_PDF_BYTES = 20 * 1024 * 1024;
 let courses = [], fb = null, user = null;
 
 const uid = () => Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4);
@@ -171,7 +177,37 @@ const linksOf = c => (c.sections||[]).flatMap(s=>(s.links||[]).map(l=>({...l,sec
 const nLinks = c => linksOf(c).length;
 const prog = c => {const a=linksOf(c);return {done:a.filter(l=>S.done[l.id]).length,total:a.length}};
 function icon(u){u=u.toLowerCase();return /youtu/.test(u)?"▶️":/drive\.google|docs\.google/.test(u)?"📁":/\.pdf(\?|$)/.test(u)?"📄":"🔗"}
-function toast(t){const e=document.createElement("div");e.className="toast";e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),1800)}
+function toast(t){const e=document.createElement("div");e.className="toast";e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2600)}
+async function storageRequest(payload){
+  if(!STORAGE_READY) throw new Error("storage-not-configured");
+  if(!user) throw new Error("admin-login-required");
+  const token=await user.getIdToken();
+  const response=await fetch(STORAGE_FUNCTION,{method:"POST",headers:{
+    "apikey":SUPABASE_ANON_KEY,"Authorization":`Bearer ${token}`,"Content-Type":"application/json"
+  },body:JSON.stringify(payload)});
+  const result=await response.json().catch(()=>({error:"استجابة غير مفهومة من خدمة الملفات"}));
+  if(!response.ok) throw new Error(result.error||`storage-http-${response.status}`);
+  return result;
+}
+let supabaseStorageClient=null;
+async function uploadWithSignedUrl(path,token,file){
+  if(!supabaseStorageClient){
+    const {createClient}=await import("https://esm.sh/@supabase/supabase-js@2");
+    supabaseStorageClient=createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{autoRefreshToken:false,persistSession:false,detectSessionInUrl:false}});
+  }
+  const {error}=await supabaseStorageClient.storage.from("library-files2").uploadToSignedUrl(path,token,file,{
+    contentType:"application/pdf",cacheControl:"3600",upsert:false
+  });
+  if(error){console.error("Signed PDF upload failed",error);throw new Error("storage-upload-failed")}
+}
+async function cleanupStoredFiles(links){
+  let ok=true;
+  for(const link of (links||[]).filter(l=>l.storagePath)){
+    try{await storageRequest({action:"delete",path:link.storagePath})}
+    catch(err){ok=false;console.error("Stored file cleanup failed",link.storagePath,err)}
+  }
+  return ok;
+}
 const isAdminRoute = () => location.hash.startsWith("#/admin");
 const ring = (d,t) => {const p=t?d/t:0;return `<div class="ring"><svg width="52" height="52" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.9" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="3.5"/><circle cx="18" cy="18" r="15.9" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="${(p*100).toFixed(1)} 100"/></svg><span>${d}/${t}</span></div>`};
 
@@ -255,7 +291,13 @@ function adminView(){
     <div style="padding:0 14px 14px">
      ${(c.sections||[]).map((s,i)=>`<div class="sub"><div class="row"><b class="grow">${esc(s.title)} (${(s.links||[]).length})</b><button class="btn del" data-act="delsec" data-id="${esc(c.id)}" data-i="${i}">حذف القسم</button></div>
        ${(s.links||[]).map(l=>`<div class="lk"><a href="${esc(safeUrl(l.url))}" target="_blank" rel="noopener">${esc(l.title)}</a><button class="sm" data-act="dellink" data-id="${esc(c.id)}" data-i="${i}" data-l="${esc(l.id)}" aria-label="حذف">✕</button></div>`).join("")}
-       <form data-form="addlinks" data-id="${esc(c.id)}" data-i="${i}"><textarea class="inp" name="t" placeholder="كل سطر: العنوان | اللينك&#10;محاضرة 1 | https://..." required></textarea><button class="btn pri" style="margin-top:6px">إضافة الروابط</button></form></div>`).join("")}
+       <form data-form="addlinks" data-id="${esc(c.id)}" data-i="${i}"><textarea class="inp" name="t" placeholder="كل سطر: العنوان | اللينك&#10;محاضرة 1 | https://..." required></textarea><button class="btn pri" style="margin-top:6px">إضافة الروابط</button></form>
+        <form class="sub" data-form="uploadfile" data-id="${esc(c.id)}" data-i="${i}">
+          <p class="hint" style="margin:0 0 8px">أو ارفعي ملف PDF مباشرةً (حتى 20 ميجابايت)</p>
+          <div class="fr"><input class="inp" name="title" type="text" maxlength="120" placeholder="اسم الملف الظاهر للطلبة" required></div>
+          <div class="fr"><input class="inp" name="file" type="file" accept=".pdf,application/pdf" aria-label="اختيار ملف PDF" required></div>
+          <button class="btn pri" type="submit">رفع ملف PDF</button>
+        </form></div>`).join("")}
      <form class="sub row" data-form="addsec" data-id="${esc(c.id)}"><input class="inp grow" name="t" placeholder="قسم جديد (مثلاً: مراجعة نهائية)" required><button class="btn">إضافة قسم</button></form>
      <div class="sub"><button class="btn del" data-act="delcourse" data-id="${esc(c.id)}">حذف المادة كلها</button></div>
     </div></details>`).join("")}`;
@@ -304,9 +346,33 @@ document.addEventListener("click",async e=>{
   else if(act==="copy"){try{await navigator.clipboard.writeText(t.dataset.url);toast("اتنسخ ✓")}catch(_){toast("مقدرتش أنسخ")}}
   else if(act==="reset"){const c=courses.find(x=>x.id===id);if(c&&confirm("تمسحي تقدمك في المادة دي؟")){linksOf(c).forEach(l=>delete S.done[l.id]);sv("em_done",S.done);route()}}
   else if(act==="logout"){await fb.signOut(fb.auth)}
-  else if(act==="delcourse"){if(confirm("حذف المادة وكل روابطها؟")){await fb.deleteDoc(fb.doc(fb.db,"courses",id))}}
-  else if(act==="delsec"){const c=courses.find(x=>x.id===id);if(c&&confirm("حذف القسم؟")){c.sections.splice(+t.dataset.i,1);await save(c)}}
-  else if(act==="dellink"){const c=courses.find(x=>x.id===id),s=c.sections[+t.dataset.i];s.links=s.links.filter(l=>l.id!==t.dataset.l);await save(c)}
+  else if(act==="delcourse"){
+    const c=courses.find(x=>x.id===id);
+    if(c&&confirm("حذف المادة وكل روابطها؟")){
+      const stored=linksOf(c).filter(l=>l.storagePath);
+      await fb.deleteDoc(fb.doc(fb.db,"courses",id));
+      if(stored.length){const ok=await cleanupStoredFiles(stored);toast(ok?"اتحذفت المادة وملفاتها ✓":"اتحذفت المادة؛ راجعي التخزين لاحتمال بقاء بعض الملفات")}
+    }
+  }
+  else if(act==="delsec"){
+    const c=courses.find(x=>x.id===id), index=+t.dataset.i, section=c?.sections?.[index];
+    if(c&&section&&confirm("حذف القسم؟")){
+      const stored=(section.links||[]).filter(l=>l.storagePath);
+      c.sections.splice(index,1);await save(c);
+      if(stored.length){const ok=await cleanupStoredFiles(stored);toast(ok?"اتحذف القسم وملفاته ✓":"اتحذف القسم؛ راجعي التخزين لاحتمال بقاء بعض الملفات")}
+    }
+  }
+  else if(act==="dellink"){
+    const c=courses.find(x=>x.id===id),s=c?.sections?.[+t.dataset.i];
+    if(!c||!s) return;
+    const link=s.links.find(l=>l.id===t.dataset.l);
+    s.links=s.links.filter(l=>l.id!==t.dataset.l);
+    await save(c);
+    if(link?.storagePath){
+      try{await storageRequest({action:"delete",path:link.storagePath});toast("اتحذف الرابط والملف ✓")}
+      catch(err){console.error(err);toast("اتحذف الرابط، لكن الملف قد يظل في التخزين")}
+    }else toast("اتحذف الرابط ✓");
+  }
 });
 
 document.addEventListener("submit",async e=>{
@@ -328,7 +394,51 @@ document.addEventListener("submit",async e=>{
       if(!add.length){toast("الصيغة: العنوان | اللينك");return}
       s.links=[...(s.links||[]),...add]; await save(c); toast(`اتضاف ${add.length} رابط ✓`);
     }
-  }catch(err){console.error(err);toast(err.code==="permission-denied"?"الإيميل ده مش مسموح له يكتب":"حصلت مشكلة: "+(err.code||err.message))}
+    else if(k==="uploadfile"){
+      if(!STORAGE_READY){toast("إعدادات التخزين لم تُضف في config.js بعد");return}
+      const file=fd.get("file"), title=String(fd.get("title")||"").trim();
+      if(!(file instanceof File)||!file.size){toast("اختاري ملف PDF أولًا");return}
+      if(!/\.pdf$/i.test(file.name)){toast("المسموح حاليًا ملفات PDF فقط");return}
+      if(file.size>MAX_PDF_BYTES){toast("حجم الملف أكبر من 20 ميجابايت");return}
+      if(file.type && file.type!=="application/pdf"){toast("الملف المحدد مش PDF صالح");return}
+      const signature=new TextDecoder().decode(new Uint8Array(await file.slice(0,5).arrayBuffer()));
+      if(signature!=="%PDF-"){toast("محتوى الملف لا يبدو PDF صالحًا");return}
+      const c=courses.find(x=>x.id===id), s=c?.sections?.[+f.dataset.i];
+      if(!c||!s){toast("المادة أو القسم مش موجود");return}
+      const button=f.querySelector('button[type="submit"]');
+      const oldText=button?.textContent;
+      let uploadedPath=null;
+      if(button){button.disabled=true;button.textContent="جاري تجهيز الرفع…"}
+      try{
+        const result=await storageRequest({action:"create-upload",courseId:id,sectionIndex:+f.dataset.i,title,fileName:file.name,fileSize:file.size,fileType:file.type||"application/pdf"});
+        uploadedPath=result.path;
+        if(button)button.textContent="جاري رفع الملف…";
+        await uploadWithSignedUrl(result.path,result.token,file);
+        const newLink={id:uid(),title,url:result.publicUrl,addedAt:Date.now(),storagePath:result.path,fileSize:file.size,fileType:"pdf"};
+        s.links=[...(s.links||[]),newLink];
+        try{await save(c)}catch(saveErr){s.links=s.links.filter(l=>l.id!==newLink.id);throw saveErr}
+        uploadedPath=null;
+        f.reset();
+        toast("اترفع الملف واتضاف للمادة ✓");
+      }catch(err){
+        if(uploadedPath){try{await storageRequest({action:"delete",path:uploadedPath})}catch(cleanupErr){console.error("File cleanup failed",cleanupErr)}}
+        throw err;
+      }finally{if(button){button.disabled=false;button.textContent=oldText||"رفع ملف PDF"}}
+    }
+  }catch(err){
+    console.error(err);
+    const msg=err.message==="storage-not-configured"?"كمّلي إعدادات Supabase أولًا":
+      err.message==="admin-login-required"?"سجّلي دخول الإدارة أولًا":
+      err.message==="admin-not-authorized"?"الإيميل مش ضمن فريق المكتبة المصرح له":
+      err.message==="firebase-token-invalid"?"جلسة الدخول انتهت؛ سجّلي الدخول مرة أخرى":
+      err.message==="admin-not-configured"?"إعداد قائمة إيميلات الفريق في Supabase غير مكتمل":
+      err.message==="storage-upload-failed"?"تعذر رفع الملف إلى التخزين؛ راجعي إعدادات الـ Bucket":
+      err.message==="storage-delete-failed"?"تعذر حذف الملف من التخزين":
+      err.message==="file-too-large-max-20mb"?"حجم الملف أكبر من 20 ميجابايت":
+      err.message==="invalid-pdf"?"محتوى الملف لا يبدو PDF صالحًا":
+      err.code==="permission-denied"?"الإيميل ده مش مسموح له يكتب":(err.message||err.code||"خطأ غير معروف");
+    toast("حصلت مشكلة: "+msg)
+  }
 });
 
 $("#q").addEventListener("input",search);
@@ -342,3 +452,4 @@ boot();
 </script>
 </body>
 </html>
+
